@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/components/ui/toast';
+import { useToast } from '@/hooks/use-toast'; // Fixed import path
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Save, Code, LayoutGrid, Eye } from 'lucide-react';
 import ComponentPreview from './ComponentPreview';
