@@ -4,9 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Wand, BookOpen } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 interface AIComponentGeneratorProps {
   onCodeGenerated: (code: string) => void;
@@ -16,6 +18,7 @@ const AIComponentGenerator: React.FC<AIComponentGeneratorProps> = ({ onCodeGener
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKey] = useState('');
+  const [apiProvider, setApiProvider] = useState<'openai' | 'perplexity'>('openai');
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const { toast } = useToast();
   
@@ -53,37 +56,71 @@ const AIComponentGenerator: React.FC<AIComponentGeneratorProps> = ({ onCodeGener
       Return ONLY the component JSX without imports or function declaration.
       Use modern Tailwind CSS for styling and make it responsive.`;
       
-      // Example implementation with Perplexity API
-      // In a real implementation, this should be done server-side to protect API keys
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'llama-3.1-sonar-small-128k-online',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a React component generator. Create modern, responsive React components using Tailwind CSS. Return only the component JSX without imports or function declaration.'
-            },
-            {
-              role: 'user',
-              content: engineeredPrompt
-            }
-          ],
-          temperature: 0.2,
-          max_tokens: 1000,
-        }),
-      });
+      let generatedCode = '';
       
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.statusText}`);
+      if (apiProvider === 'openai') {
+        // Call OpenAI API
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              {
+                role: 'system',
+                content: 'You are a React component generator. Create modern, responsive React components using Tailwind CSS. Return only the component JSX without imports or function declaration.'
+              },
+              {
+                role: 'user',
+                content: engineeredPrompt
+              }
+            ],
+            temperature: 0.2,
+            max_tokens: 1000,
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`OpenAI API request failed: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        generatedCode = data.choices[0].message.content;
+      } else {
+        // Call Perplexity API (existing implementation)
+        const response = await fetch('https://api.perplexity.ai/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'llama-3.1-sonar-small-128k-online',
+            messages: [
+              {
+                role: 'system',
+                content: 'You are a React component generator. Create modern, responsive React components using Tailwind CSS. Return only the component JSX without imports or function declaration.'
+              },
+              {
+                role: 'user',
+                content: engineeredPrompt
+              }
+            ],
+            temperature: 0.2,
+            max_tokens: 1000,
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Perplexity API request failed: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        generatedCode = data.choices[0].message.content;
       }
-      
-      const data = await response.json();
-      let generatedCode = data.choices[0].message.content;
       
       // Clean up the response to extract just the code
       generatedCode = generatedCode.replace(/```jsx|```tsx|```js|```tsx|```/g, '').trim();
@@ -195,22 +232,51 @@ const AIComponentGenerator: React.FC<AIComponentGeneratorProps> = ({ onCodeGener
               <BookOpen className="h-4 w-4" />
               <AlertTitle>API Configuration</AlertTitle>
               <AlertDescription>
-                To use the AI component generator, you need to provide a Perplexity API key. 
+                To use the AI component generator, you need to provide an API key.
                 Your key is stored locally and never sent to our servers.
               </AlertDescription>
             </Alert>
             
-            <div>
-              <Label htmlFor="apiKey">Perplexity API Key</Label>
-              <Input 
-                id="apiKey"
-                type="password" 
-                placeholder="pplx-xxxxxxxxxxxxxxxxxxxxxxxx" 
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="mb-4"
-              />
-            </div>
+            <Tabs defaultValue="openai" onValueChange={(value) => setApiProvider(value as 'openai' | 'perplexity')}>
+              <TabsList className="mb-4">
+                <TabsTrigger value="openai">OpenAI</TabsTrigger>
+                <TabsTrigger value="perplexity">Perplexity</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="openai">
+                <div>
+                  <Label htmlFor="openaiApiKey">OpenAI API Key</Label>
+                  <Input 
+                    id="openaiApiKey"
+                    type="password" 
+                    placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx" 
+                    value={apiProvider === 'openai' ? apiKey : ''}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="mb-4"
+                  />
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Using OpenAI's GPT-4o-mini model for component generation.
+                  </p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="perplexity">
+                <div>
+                  <Label htmlFor="perplexityApiKey">Perplexity API Key</Label>
+                  <Input 
+                    id="perplexityApiKey"
+                    type="password" 
+                    placeholder="pplx-xxxxxxxxxxxxxxxxxxxxxxxx" 
+                    value={apiProvider === 'perplexity' ? apiKey : ''}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="mb-4"
+                  />
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Using Perplexity's Llama 3.1 model for component generation.
+                  </p>
+                </div>
+              </TabsContent>
+            </Tabs>
             
             <div className="flex justify-end gap-2">
               <Button 
@@ -224,7 +290,7 @@ const AIComponentGenerator: React.FC<AIComponentGeneratorProps> = ({ onCodeGener
                   if (apiKey.trim()) {
                     toast({
                       title: "API Key saved",
-                      description: "Your API key has been saved for this session"
+                      description: `Your ${apiProvider === 'openai' ? 'OpenAI' : 'Perplexity'} API key has been saved for this session`
                     });
                   }
                   setShowApiKeyInput(false);
