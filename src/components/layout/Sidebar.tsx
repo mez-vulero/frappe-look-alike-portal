@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, 
   Settings, 
@@ -10,11 +10,13 @@ import {
   Calendar, 
   LayoutDashboard,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Component
 } from 'lucide-react';
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
   
   const menuItems = [
     { name: 'Home', icon: <Home size={20} />, path: '/' },
@@ -23,6 +25,7 @@ const Sidebar = () => {
     { name: 'Messages', icon: <Mail size={20} />, path: '/messages' },
     { name: 'Documents', icon: <File size={20} />, path: '/documents' },
     { name: 'Calendar', icon: <Calendar size={20} />, path: '/calendar' },
+    { name: 'Setup', icon: <Component size={20} />, path: '/setup' },
     { name: 'Settings', icon: <Settings size={20} />, path: '/settings' },
   ];
   
@@ -49,7 +52,7 @@ const Sidebar = () => {
               <Link
                 to={item.path}
                 className={`flex items-center px-4 py-3 text-gray-700 hover:bg-frappe-50 hover:text-frappe-600 rounded-md transition-colors ${
-                  window.location.pathname === item.path ? 'bg-frappe-50 text-frappe-600 border-r-4 border-frappe-500' : ''
+                  location.pathname === item.path ? 'bg-frappe-50 text-frappe-600 border-r-4 border-frappe-500' : ''
                 }`}
               >
                 <span className="mr-3">{item.icon}</span>
