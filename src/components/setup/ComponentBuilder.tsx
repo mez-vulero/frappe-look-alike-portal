@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast'; // Fixed import path
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Plus, Save, Code, LayoutGrid, Eye } from 'lucide-react';
+import { Plus, Save, Code, LayoutGrid, Eye, Wand, BookOpen } from 'lucide-react';
 import ComponentPreview from './ComponentPreview';
 import { useComponentStore } from '../../stores/componentStore';
+import AIComponentGenerator from './AIComponentGenerator';
 
 const ComponentBuilder: React.FC = () => {
   const { toast } = useToast();
@@ -119,6 +120,10 @@ const ComponentBuilder: React.FC = () => {
                       <Code className="mr-2" size={16} />
                       Code
                     </TabsTrigger>
+                    <TabsTrigger value="ai">
+                      <Wand className="mr-2" size={16} />
+                      AI Generator
+                    </TabsTrigger>
                     <TabsTrigger value="preview">
                       <Eye className="mr-2" size={16} />
                       Preview
@@ -129,11 +134,19 @@ const ComponentBuilder: React.FC = () => {
                     <Card>
                       <CardContent className="p-4">
                         <p className="text-sm text-gray-500 mb-4">
-                          Visual editor coming soon. Please use the code editor for now.
+                          Visual editor coming soon. Please use the code editor or AI generator for now.
                         </p>
-                        <Button onClick={() => setActiveTab('code')}>
-                          Go to code editor
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button onClick={() => setActiveTab('code')}>
+                            Go to code editor
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setActiveTab('ai')}
+                          >
+                            Try AI generator
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   </TabsContent>
@@ -153,6 +166,19 @@ const ComponentBuilder: React.FC = () => {
                         </ScrollArea>
                       </CardContent>
                     </Card>
+                  </TabsContent>
+
+                  <TabsContent value="ai">
+                    <AIComponentGenerator 
+                      onCodeGenerated={(generatedCode) => {
+                        setComponentCode(generatedCode);
+                        setActiveTab('preview');
+                        toast({
+                          title: "Component generated",
+                          description: "Your component code has been generated. Check the preview and make any needed adjustments.",
+                        });
+                      }}
+                    />
                   </TabsContent>
                   
                   <TabsContent value="preview">
