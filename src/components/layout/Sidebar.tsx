@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -19,14 +18,11 @@ const Sidebar = () => {
   const location = useLocation();
   
   const menuItems = [
-    { name: 'Home', icon: <Home size={20} />, path: '/' },
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
     { name: 'Users', icon: <Users size={20} />, path: '/users' },
     { name: 'Messages', icon: <Mail size={20} />, path: '/messages' },
-    { name: 'Documents', icon: <File size={20} />, path: '/documents' },
-    { name: 'Calendar', icon: <Calendar size={20} />, path: '/calendar' },
-    { name: 'Setup', icon: <Component size={20} />, path: '/setup' },
-    { name: 'Settings', icon: <Settings size={20} />, path: '/settings' },
+    { name: 'Courses', icon: <File size={20} />, path: '/courses' },
+    { name: 'Account and Settings', icon: <Settings size={20} />, path: '/account-settings' },
   ];
   
   return (
