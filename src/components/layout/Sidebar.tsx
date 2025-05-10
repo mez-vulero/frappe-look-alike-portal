@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -30,7 +31,7 @@ const Sidebar = () => {
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
         {!collapsed && (
           <div className="flex items-center">
-            <span className="text-xl font-bold text-frappe-600">Frappe</span>
+            <span className="text-xl font-bold text-frappe-600">Globedock</span>
           </div>
         )}
         <button 
